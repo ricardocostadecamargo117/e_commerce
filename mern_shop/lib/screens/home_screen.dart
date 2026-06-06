@@ -1,123 +1,252 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/product.dart';
+import '../providers/auth_provider.dart';
+import '../providers/product_provider.dart';
 import '../widgets/app_header.dart';
 import '../widgets/product_card.dart';
 import '../theme.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
-
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  List<Product> _filteredProducts = mockProducts;
-  String _searchQuery = '';
+  final _searchCtrl = TextEditingController();
+  String _search = '';
+  String _category = 'Todos';
 
   @override
   void dispose() {
-    _searchController.dispose();
+    _searchCtrl.dispose();
     super.dispose();
-  }
-
-  void _onSearch(String query) {
-    setState(() {
-      _searchQuery = query.trim().toLowerCase();
-      _filteredProducts = _searchQuery.isEmpty
-          ? mockProducts
-          : mockProducts
-              .where((p) => p.name.toLowerCase().contains(_searchQuery))
-              .toList();
-    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final productProv = context.watch<ProductProvider>();
+
+    List<Product> displayed = productProv.products;
+    if (_category != 'Todos') {
+      displayed = displayed.where((p) => p.category == _category).toList();
+    }
+    if (_search.isNotEmpty) {
+      final q = _search.toLowerCase();
+      displayed = displayed
+          .where((p) =>
+              p.name.toLowerCase().contains(q) ||
+              p.category.toLowerCase().contains(q))
+          .toList();
+    }
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: kBg,
       appBar: AppHeader(
-        searchController: _searchController,
-        onSearch: _onSearch,
+        searchController: _searchCtrl,
+        onSearch: (v) => setState(() => _search = v),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Latest Products',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: kTextDark,
+      body: CustomScrollView(
+        slivers: [
+          // ── Hero Banner ─────────────────────────────────────────────
+          SliverToBoxAdapter(
+            child: Container(
+              margin: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(32),
+              height: 180,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF1A1508), Color(0xFF0D0D10)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
+                borderRadius: BorderRadius.circular(20),
+                border:
+                    Border.all(color: kGold.withOpacity(0.25), width: 0.5),
               ),
-              const SizedBox(height: 20),
-              if (_filteredProducts.isEmpty)
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(40),
+              child: Row(
+                children: [
+                  Expanded(
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.search_off,
-                            size: 60, color: kBorderGrey),
-                        const SizedBox(height: 12),
                         Text(
-                          'Nenhum produto encontrado para "$_searchQuery"',
-                          style: const TextStyle(
-                              color: kTextGrey, fontSize: 15),
-                          textAlign: TextAlign.center,
+                          'Coleção\nExclusiva',
+                          style: GoogleFonts.playfairDisplay(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w700,
+                            color: kText,
+                            height: 1.1,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Moda de alto padrão, direto para você.',
+                          style: TextStyle(color: kTextMuted, fontSize: 13),
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            gradient: kGoldGradient,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text(
+                            'Ver Coleção',
+                            style: TextStyle(
+                                color: kBg,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700),
+                          ),
                         ),
                       ],
                     ),
                   ),
-                )
-              else
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    int crossAxisCount = 2;
-                    if (constraints.maxWidth > 900) crossAxisCount = 4;
-                    else if (constraints.maxWidth > 600) crossAxisCount = 3;
-
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisCount,
-                        childAspectRatio: 0.72,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                      ),
-                      itemCount: _filteredProducts.length,
-                      itemBuilder: (context, index) {
-                        final product = _filteredProducts[index];
-                        return ProductCard(
-                          product: product,
-                          onTap: () => Navigator.pushNamed(
-                            context,
-                            '/product',
-                            arguments: product,
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
-            ],
+                  const SizedBox(width: 20),
+                  const Icon(Icons.diamond, color: kGold, size: 80),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16),
-        color: kLightGrey,
-        child: const Text(
-          'Copyright © MERN Shop',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 12, color: kTextGrey),
-        ),
+
+          // ── Category Filter ─────────────────────────────────────────
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 44,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                itemCount: productCategories.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (_, i) {
+                  final cat = productCategories[i];
+                  final selected = _category == cat;
+                  return GestureDetector(
+                    onTap: () => setState(() => _category = cat),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: selected ? kGold : kSurface,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: selected ? kGold : kBorder,
+                          width: 0.5,
+                        ),
+                      ),
+                      child: Text(
+                        cat,
+                        style: TextStyle(
+                          color: selected ? kBg : kTextMuted,
+                          fontSize: 12,
+                          fontWeight: selected
+                              ? FontWeight.w700
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+
+          const SliverToBoxAdapter(child: SizedBox(height: 20)),
+
+          // ── Section Title ───────────────────────────────────────────
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    _category == 'Todos' ? 'Todos os Produtos' : _category,
+                    style: GoogleFonts.playfairDisplay(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                        color: kText),
+                  ),
+                  Text(
+                    '${displayed.length} itens',
+                    style: const TextStyle(color: kTextMuted, fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+
+          // ── Grid ────────────────────────────────────────────────────
+          displayed.isEmpty
+              ? SliverFillRemaining(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.search_off,
+                            size: 60, color: kTextFaint),
+                        const SizedBox(height: 12),
+                        Text(
+                            'Nenhum produto encontrado',
+                            style: const TextStyle(
+                                color: kTextMuted, fontSize: 16)),
+                        if (_search.isNotEmpty || _category != 'Todos')
+                          TextButton(
+                            onPressed: () => setState(() {
+                              _search = '';
+                              _searchCtrl.clear();
+                              _category = 'Todos';
+                            }),
+                            child: const Text('Limpar filtros'),
+                          ),
+                      ],
+                    ),
+                  ),
+                )
+              : SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  sliver: SliverGrid(
+                    delegate: SliverChildBuilderDelegate(
+                      (_, i) => ProductCard(
+                        product: displayed[i],
+                        onTap: () => Navigator.pushNamed(
+                          context,
+                          '/product',
+                          arguments: displayed[i],
+                        ),
+                      ),
+                      childCount: displayed.length,
+                    ),
+                    gridDelegate:
+                        SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 260,
+                      childAspectRatio: 0.65,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                    ),
+                  ),
+                ),
+
+          const SliverToBoxAdapter(child: SizedBox(height: 32)),
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Text(
+                'Copyright © 2024 MERN Shop',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: kTextFaint, fontSize: 12),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -3,97 +3,97 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/cart_provider.dart';
 import '../theme.dart';
+import 'user_avatar.dart';
 
-class AppHeader extends StatefulWidget implements PreferredSizeWidget {
+class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   final TextEditingController? searchController;
-  final Function(String)? onSearch;
+  final ValueChanged<String>? onSearch;
 
   const AppHeader({super.key, this.searchController, this.onSearch});
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
-
-  @override
-  State<AppHeader> createState() => _AppHeaderState();
-}
-
-class _AppHeaderState extends State<AppHeader> {
-  late TextEditingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = widget.searchController ?? TextEditingController();
-  }
+  Size get preferredSize => const Size.fromHeight(64);
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final cart = context.watch<CartProvider>();
-    final isWide = MediaQuery.of(context).size.width > 600;
+    final wide = MediaQuery.of(context).size.width > 680;
 
-    return AppBar(
-      backgroundColor: kPrimaryRed,
-      automaticallyImplyLeading: false,
-      titleSpacing: 16,
-      title: Row(
+    return Container(
+      height: 64,
+      decoration: const BoxDecoration(
+        color: kBg,
+        border: Border(bottom: BorderSide(color: kBorder, width: 0.5)),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
         children: [
-          // Brand name
+          // ── Brand ────────────────────────────────────────────────────────
           GestureDetector(
-            onTap: () => Navigator.pushNamedAndRemoveUntil(
-                context, '/', (route) => false),
-            child: const Text(
-              'MERN Shop',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                letterSpacing: 0.5,
+            onTap: () =>
+                Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false),
+            child: Row(children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  gradient: kGoldGradient,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.diamond_outlined,
+                    color: kBg, size: 18),
               ),
-            ),
+              const SizedBox(width: 10),
+              if (wide)
+                const Text(
+                  'MERN SHOP',
+                  style: TextStyle(
+                    color: kText,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 2,
+                  ),
+                ),
+            ]),
           ),
-          if (isWide) ...[
-            const SizedBox(width: 20),
-            // Search bar
+
+          // ── Search ───────────────────────────────────────────────────────
+          if (wide) ...[
+            const SizedBox(width: 24),
             Expanded(
-              child: SizedBox(
-                height: 36,
+              child: Container(
+                height: 38,
+                decoration: BoxDecoration(
+                  color: kSurface2,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: kBorder),
+                ),
                 child: TextField(
-                  controller: _controller,
-                  onSubmitted: widget.onSearch,
+                  controller: searchController,
+                  onSubmitted: onSearch,
+                  style: const TextStyle(color: kText, fontSize: 13),
                   decoration: InputDecoration(
-                    hintText: 'Search Products...',
+                    hintText: 'Buscar produtos...',
                     hintStyle:
-                        const TextStyle(fontSize: 13, color: Colors.black54),
-                    filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 0),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(3),
-                      borderSide: BorderSide.none,
-                    ),
-                    suffixIcon: SizedBox(
-                      width: 70,
-                      child: ElevatedButton(
-                        onPressed: () =>
-                            widget.onSearch?.call(_controller.text),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue[600],
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                              topRight: Radius.circular(3),
-                              bottomRight: Radius.circular(3),
-                            ),
-                          ),
-                          padding: EdgeInsets.zero,
-                          elevation: 0,
-                        ),
-                        child: const Text('Search',
-                            style:
-                                TextStyle(fontSize: 13, color: Colors.white)),
-                      ),
-                    ),
+                        const TextStyle(color: kTextFaint, fontSize: 13),
+                    prefixIcon: const Icon(Icons.search,
+                        color: kTextFaint, size: 18),
+                    suffixIcon: searchController != null &&
+                            (searchController?.text.isNotEmpty ?? false)
+                        ? GestureDetector(
+                            onTap: () {
+                              searchController?.clear();
+                              onSearch?.call('');
+                            },
+                            child: const Icon(Icons.close,
+                                color: kTextFaint, size: 16),
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
                   ),
                 ),
               ),
@@ -101,146 +101,178 @@ class _AppHeaderState extends State<AppHeader> {
             const SizedBox(width: 16),
           ] else
             const Spacer(),
-          // Cart
-          _HeaderIconButton(
-            icon: Icons.shopping_cart_outlined,
-            label: 'Cart',
-            badge: cart.itemCount > 0 ? '${cart.itemCount}' : null,
+
+          // ── Cart ─────────────────────────────────────────────────────────
+          _HeaderButton(
             onTap: () => Navigator.pushNamed(context, '/cart'),
-          ),
-          const SizedBox(width: 8),
-          // Auth area
-          if (auth.isLoggedIn)
-            _UserMenu(userName: auth.userName)
-          else
-            _HeaderIconButton(
-              icon: Icons.person_outline,
-              label: 'Sign In',
-              onTap: () => Navigator.pushNamed(context, '/login'),
-            ),
-          const SizedBox(width: 8),
-        ],
-      ),
-    );
-  }
-}
-
-class _HeaderIconButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String? badge;
-  final VoidCallback onTap;
-
-  const _HeaderIconButton({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.badge,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Icon(icon, color: Colors.white, size: 20),
-              if (badge != null)
-                Positioned(
-                  top: -6,
-                  right: -8,
-                  child: Container(
-                    padding: const EdgeInsets.all(3),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      badge!,
-                      style: const TextStyle(
-                          fontSize: 10,
-                          color: kPrimaryRed,
-                          fontWeight: FontWeight.bold),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(Icons.shopping_bag_outlined,
+                    color: kText, size: 22),
+                if (cart.itemCount > 0)
+                  Positioned(
+                    top: -6,
+                    right: -8,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                          color: kGold, shape: BoxShape.circle),
+                      child: Text(
+                        '${cart.itemCount}',
+                        style: const TextStyle(
+                            fontSize: 9,
+                            color: kBg,
+                            fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(width: 4),
-          Text(label,
-              style: const TextStyle(color: Colors.white, fontSize: 13)),
+          const SizedBox(width: 8),
+
+          // ── Auth ─────────────────────────────────────────────────────────
+          if (auth.isLoggedIn)
+            _UserDropdown(auth: auth)
+          else ...[
+            _HeaderButton(
+              onTap: () => Navigator.pushNamed(context, '/login'),
+              child: const Text('Entrar',
+                  style: TextStyle(color: kText, fontSize: 13)),
+            ),
+            const SizedBox(width: 4),
+            GestureDetector(
+              onTap: () => Navigator.pushNamed(context, '/register'),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 14, vertical: 7),
+                decoration: BoxDecoration(
+                  gradient: kGoldGradient,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text('Cadastrar',
+                    style: TextStyle(
+                        color: kBg,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600)),
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 }
 
-class _UserMenu extends StatelessWidget {
-  final String userName;
-  const _UserMenu({required this.userName});
+class _HeaderButton extends StatelessWidget {
+  final Widget child;
+  final VoidCallback onTap;
+  const _HeaderButton({required this.child, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: child,
+        ),
+      );
+}
+
+class _UserDropdown extends StatelessWidget {
+  final AuthProvider auth;
+  const _UserDropdown({required this.auth});
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.read<AuthProvider>();
     return PopupMenuButton<String>(
-      onSelected: (value) {
-        if (value == 'logout') {
-          auth.logout();
-          Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+      onSelected: (v) {
+        switch (v) {
+          case 'profile':
+            Navigator.pushNamed(context, '/profile');
+            break;
+          case 'orders':
+            Navigator.pushNamed(context, '/orders');
+            break;
+          case 'admin':
+            Navigator.pushNamed(context, '/admin');
+            break;
+          case 'logout':
+            auth.logout();
+            Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
+            break;
         }
       },
-      offset: const Offset(0, 40),
+      color: kSurface2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: kBorder),
+      ),
+      offset: const Offset(0, 48),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.person, color: Colors.white, size: 20),
-          const SizedBox(width: 4),
-          Text(
-            userName,
-            style: const TextStyle(
-                color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+          UserAvatar(
+            name: auth.user!.name,
+            avatarPath: auth.avatarLocalPath,
+            radius: 16,
           ),
-          const Icon(Icons.arrow_drop_down, color: Colors.white, size: 18),
+          const SizedBox(width: 8),
+          Text(
+            auth.user!.name.split(' ').first,
+            style: const TextStyle(color: kText, fontSize: 13),
+          ),
+          const Icon(Icons.expand_more, color: kTextMuted, size: 16),
         ],
       ),
-      itemBuilder: (context) => [
+      itemBuilder: (_) => [
         PopupMenuItem(
           enabled: false,
-          child: Text('Olá, $userName',
-              style: const TextStyle(
-                  fontWeight: FontWeight.bold, color: kPrimaryRed)),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(auth.user!.name,
+                style: const TextStyle(
+                    color: kText, fontWeight: FontWeight.w600, fontSize: 14)),
+            Text(auth.user!.email,
+                style: const TextStyle(color: kTextMuted, fontSize: 12)),
+          ]),
         ),
         const PopupMenuDivider(),
+        if (auth.isAdmin)
+          const PopupMenuItem(
+            value: 'admin',
+            child: _MenuItem(icon: Icons.admin_panel_settings_outlined,
+                label: 'Painel Admin', color: kAdminAccent),
+          ),
         const PopupMenuItem(
           value: 'profile',
-          child: Row(children: [
-            Icon(Icons.person_outline, size: 18),
-            SizedBox(width: 8),
-            Text('Meu Perfil'),
-          ]),
+          child: _MenuItem(icon: Icons.person_outline, label: 'Meu Perfil'),
         ),
         const PopupMenuItem(
           value: 'orders',
-          child: Row(children: [
-            Icon(Icons.receipt_long_outlined, size: 18),
-            SizedBox(width: 8),
-            Text('Meus Pedidos'),
-          ]),
+          child: _MenuItem(icon: Icons.receipt_long_outlined, label: 'Meus Pedidos'),
         ),
         const PopupMenuDivider(),
         const PopupMenuItem(
           value: 'logout',
-          child: Row(children: [
-            Icon(Icons.logout, size: 18, color: kPrimaryRed),
-            SizedBox(width: 8),
-            Text('Sair', style: TextStyle(color: kPrimaryRed)),
-          ]),
+          child: _MenuItem(icon: Icons.logout, label: 'Sair', color: kError),
         ),
       ],
     );
   }
+}
+
+class _MenuItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  const _MenuItem(
+      {required this.icon, required this.label, this.color = kText});
+
+  @override
+  Widget build(BuildContext context) => Row(children: [
+        Icon(icon, size: 16, color: color),
+        const SizedBox(width: 10),
+        Text(label, style: TextStyle(color: color, fontSize: 13)),
+      ]);
 }

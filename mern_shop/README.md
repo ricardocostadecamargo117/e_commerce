@@ -1,81 +1,134 @@
-# MERN Shop — Flutter Frontend Prototype
+# MERN Shop v2 — Dark Luxury E-commerce Flutter Prototype
 
-Protótipo de e-commerce desenvolvido em Flutter. Apenas frontend, sem backend real.
+Design: **Dark Luxury Editorial** — fundo near-black, acentos dourados/âmbar, tipografia Playfair Display + DM Sans.
+
+---
 
 ## Estrutura do Projeto
 
 ```
 lib/
-├── main.dart                  # Entry point e configuração de rotas
-├── theme.dart                 # Tema global (cores, botões, inputs)
+├── main.dart
+├── theme.dart                        # Cores, gradientes, decorações globais
 ├── models/
-│   ├── product.dart           # Modelo de produto + dados mock
-│   └── cart_item.dart         # Modelo de item do carrinho
+│   ├── product.dart                  # Produto + 10 mock products
+│   ├── order.dart                    # Pedido, status, endereço, pagamento
+│   └── user.dart                     # Usuário + mock DB
 ├── providers/
-│   ├── auth_provider.dart     # Estado de autenticação (mock)
-│   └── cart_provider.dart     # Estado do carrinho
+│   ├── auth_provider.dart            # Login, cadastro, perfil, avatar
+│   ├── cart_provider.dart            # Carrinho com cálculo de frete e impostos
+│   ├── order_provider.dart           # Criar e rastrear pedidos
+│   └── product_provider.dart        # CRUD de produtos (admin)
 ├── screens/
-│   ├── home_screen.dart       # Página inicial com grid de produtos
-│   ├── login_screen.dart      # Página de login
-│   ├── register_screen.dart   # Página de cadastro
-│   ├── product_screen.dart    # Detalhe do produto
-│   └── cart_screen.dart       # Carrinho + resumo do pedido
+│   ├── home_screen.dart              # Grid + filtro por categoria + busca
+│   ├── login_screen.dart             # Login dividido (decorativo + form)
+│   ├── register_screen.dart         # Cadastro com validação e termos
+│   ├── product_screen.dart          # Detalhe completo do produto
+│   ├── cart_screen.dart             # Carrinho + Endereço + Pagamento (3 steps)
+│   ├── order_success_screen.dart    # Confirmação do pedido com rastreio
+│   ├── orders_screen.dart           # Lista de pedidos com stepper
+│   ├── profile_screen.dart          # Perfil + upload de avatar + edição
+│   └── admin/
+│       └── admin_screen.dart        # Dashboard admin: produtos + pedidos
 └── widgets/
-    ├── app_header.dart        # Cabeçalho com logout
-    └── product_card.dart      # Card do produto no grid
+    ├── app_header.dart              # Header com dropdown de usuário + logout
+    ├── product_card.dart            # Card com hover, badges, low-stock
+    ├── user_avatar.dart             # Avatar com iniciais ou imagem local
+    └── order_status_stepper.dart   # Stepper animado de status do pedido
 ```
 
-## Páginas
+---
 
-| Rota        | Tela                  |
-|-------------|-----------------------|
-| `/`         | Home (Grid de produtos)|
-| `/login`    | Login                 |
-| `/register` | Cadastro              |
-| `/product`  | Detalhe do produto    |
-| `/cart`     | Carrinho              |
+## Páginas e Rotas
+
+| Rota             | Tela                        | Acesso        |
+|------------------|-----------------------------|---------------|
+| `/`              | Home (grid + filtros)       | Público       |
+| `/login`         | Login                       | Público       |
+| `/register`      | Cadastro                    | Público       |
+| `/product`       | Detalhe do produto          | Público       |
+| `/cart`          | Carrinho + Checkout         | Público/Login |
+| `/order-success` | Confirmação de pedido       | Login         |
+| `/orders`        | Meus pedidos                | Login         |
+| `/profile`       | Perfil do usuário           | Login         |
+| `/admin`         | Painel administrativo       | Admin         |
+
+---
 
 ## Funcionalidades
 
-- ✅ Grid responsivo de produtos (2/3/4 colunas)
-- ✅ Busca de produtos por nome
-- ✅ Detalhe do produto com seletor de quantidade
-- ✅ Carrinho com controle de itens
-- ✅ Resumo do pedido (subtotal, frete, impostos)
-- ✅ Login/Cadastro mock (sem backend)
-- ✅ Header dinâmico com logout
-- ✅ Navegação completa entre telas
+### Usuário
+- ✅ Login / Cadastro com validação completa
+- ✅ Upload de foto de perfil (image_picker)
+- ✅ Edição de nome, telefone e bio
+- ✅ Avatar com iniciais como fallback
+- ✅ Dropdown no header com logout
+
+### Produtos
+- ✅ Grid responsivo com 10 produtos mock
+- ✅ Filtro por categoria (chips horizontais)
+- ✅ Busca por nome/categoria
+- ✅ Badges: NOVO, % desconto, baixo estoque
+- ✅ Detalhe do produto com avaliações e parcelas
+
+### Carrinho & Compra
+- ✅ Carrinho com controle de quantidade
+- ✅ Frete grátis acima de R$ 200
+- ✅ Cálculo de impostos (6%)
+- ✅ Checkout em 3 etapas: Carrinho → Endereço → Pagamento
+- ✅ 4 formas de pagamento: Crédito, Débito, Pix, Boleto
+- ✅ Simulação de cartão visual
+- ✅ Pedido confirmado com stepper de rastreio
+
+### Admin (admin@mernshop.com / admin123)
+- ✅ Dashboard com estatísticas (produtos, pedidos, receita)
+- ✅ Adicionar / Editar / Excluir produtos
+- ✅ Gerenciar status dos pedidos
+- ✅ Badge visual de admin no perfil
+
+---
 
 ## Como Rodar
 
-### Pré-requisitos
-- Flutter SDK 3.0+
-- Dart 3.0+
-
-### Instalação
-
 ```bash
-# Instalar dependências
+# 1. Instalar dependências
 flutter pub get
 
-# Rodar no navegador (web)
+# 2. Rodar na web
 flutter run -d chrome
 
-# Rodar no emulador/dispositivo
+# 3. Rodar no dispositivo/emulador
 flutter run
 ```
+
+### Contas de demonstração
+
+| Tipo    | E-mail               | Senha    |
+|---------|----------------------|----------|
+| Admin   | admin@mernshop.com   | admin123 |
+| Cliente | joao@email.com       | 123456   |
+
+---
 
 ## Dependências
 
 ```yaml
-provider: ^6.1.1         # Gerenciamento de estado
-go_router: ^13.0.0       # Roteamento (opcional, app usa Navigator)
+provider: ^6.1.1              # State management
+image_picker: ^1.0.7          # Upload de avatar
+intl: ^0.19.0                 # Formatação de datas
+uuid: ^4.3.3                  # IDs únicos para pedidos
 cached_network_image: ^3.3.1  # Cache de imagens
+flutter_animate: ^4.5.0       # Animações
+google_fonts: ^6.2.1          # Playfair Display + DM Sans
+shimmer: ^3.0.0               # Skeleton loading
 ```
 
-## Observações
+---
 
-- Todos os dados são **mock** (hardcoded) — nenhuma API real é chamada
-- O login/cadastro apenas simula autenticação e salva o nome do usuário no estado
-- As imagens usam `picsum.photos` como placeholder
-- Para adicionar backend: substitua os providers por chamadas à API real
+## Próximos Passos (Backend)
+
+Para conectar a um backend real, substitua:
+- `providers/auth_provider.dart` → chamadas HTTP para `/api/auth`
+- `providers/product_provider.dart` → `/api/products`
+- `providers/order_provider.dart` → `/api/orders`
+- `models/user.dart` (mockUserDb) → MongoDB via API REST
