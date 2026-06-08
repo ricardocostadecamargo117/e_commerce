@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/product.dart';
-import '../providers/auth_provider.dart';
 import '../providers/product_provider.dart';
 import '../widgets/app_header.dart';
 import '../widgets/product_card.dart';
@@ -26,8 +25,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // Carrega produtos da API ao abrir o app
+    Future.microtask(() => context.read<ProductProvider>().fetchProducts());
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
     final productProv = context.watch<ProductProvider>();
 
     List<Product> displayed = productProv.products;
@@ -64,8 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(20),
-                border:
-                    Border.all(color: kGold.withOpacity(0.25), width: 0.5),
+                border: Border.all(color: kGold.withOpacity(0.25), width: 0.5),
               ),
               child: Row(
                 children: [
@@ -145,9 +149,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: TextStyle(
                           color: selected ? kBg : kTextMuted,
                           fontSize: 12,
-                          fontWeight: selected
-                              ? FontWeight.w700
-                              : FontWeight.normal,
+                          fontWeight:
+                              selected ? FontWeight.w700 : FontWeight.normal,
                         ),
                       ),
                     ),
@@ -194,8 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         const Icon(Icons.search_off,
                             size: 60, color: kTextFaint),
                         const SizedBox(height: 12),
-                        Text(
-                            'Nenhum produto encontrado',
+                        Text('Nenhum produto encontrado',
                             style: const TextStyle(
                                 color: kTextMuted, fontSize: 16)),
                         if (_search.isNotEmpty || _category != 'Todos')
@@ -225,8 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       childCount: displayed.length,
                     ),
-                    gridDelegate:
-                        SliverGridDelegateWithMaxCrossAxisExtent(
+                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                       maxCrossAxisExtent: 260,
                       childAspectRatio: 0.65,
                       crossAxisSpacing: 16,

@@ -43,8 +43,7 @@ class _AdminScreenState extends State<AdminScreen>
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
             Icon(Icons.block, color: kError, size: 60),
             SizedBox(height: 16),
-            Text('Acesso negado',
-                style: TextStyle(color: kText, fontSize: 18)),
+            Text('Acesso negado', style: TextStyle(color: kText, fontSize: 18)),
             SizedBox(height: 8),
             Text('Apenas administradores podem acessar esta área.',
                 style: TextStyle(color: kTextMuted)),
@@ -54,7 +53,7 @@ class _AdminScreenState extends State<AdminScreen>
     }
 
     final products = context.watch<ProductProvider>().products;
-    final orders   = context.watch<OrderProvider>().orders;
+    final orders = context.watch<OrderProvider>().orders;
 
     return Scaffold(
       backgroundColor: kBg,
@@ -113,7 +112,8 @@ class _AdminScreenState extends State<AdminScreen>
                     const SizedBox(width: 12),
                     _StatCard(
                         label: 'Em Aberto',
-                        value: '${orders.where((o) => o.status != OrderStatus.delivered && o.status != OrderStatus.cancelled).length}',
+                        value:
+                            '${orders.where((o) => o.status != OrderStatus.delivered && o.status != OrderStatus.cancelled).length}',
                         icon: Icons.pending_outlined,
                         color: Colors.orange),
                   ]),
@@ -132,8 +132,7 @@ class _AdminScreenState extends State<AdminScreen>
                     indicator: BoxDecoration(
                       color: kAdminAccent.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                          color: kAdminAccent.withOpacity(0.4)),
+                      border: Border.all(color: kAdminAccent.withOpacity(0.4)),
                     ),
                     labelColor: kAdminAccent,
                     unselectedLabelColor: kTextMuted,
@@ -207,8 +206,7 @@ class _ProductsTab extends StatelessWidget {
                 height: 60,
                 child: Image.network(p.image,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) =>
-                        Container(color: kSurface2)),
+                    errorBuilder: (_, __, ___) => Container(color: kSurface2)),
               ),
             ),
             const SizedBox(width: 14),
@@ -224,8 +222,8 @@ class _ProductsTab extends StatelessWidget {
                   const SizedBox(height: 3),
                   Row(children: [
                     Text(p.category,
-                        style: const TextStyle(
-                            color: kTextFaint, fontSize: 11)),
+                        style:
+                            const TextStyle(color: kTextFaint, fontSize: 11)),
                     const SizedBox(width: 8),
                     Container(
                       width: 1,
@@ -258,8 +256,7 @@ class _ProductsTab extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.delete_outline,
-                    color: kError, size: 18),
+                icon: const Icon(Icons.delete_outline, color: kError, size: 18),
                 onPressed: () => _confirmDelete(context, p),
               ),
             ]),
@@ -274,17 +271,15 @@ class _ProductsTab extends StatelessWidget {
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: kSurface2,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Excluir produto?',
-            style: TextStyle(color: kText)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Excluir produto?', style: TextStyle(color: kText)),
         content: Text('Tem certeza que deseja excluir "${p.name}"?',
             style: const TextStyle(color: kTextMuted)),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar',
-                  style: TextStyle(color: kTextMuted))),
+              child:
+                  const Text('Cancelar', style: TextStyle(color: kTextMuted))),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: kError),
             onPressed: () {
@@ -347,8 +342,7 @@ class _OrdersTab extends StatelessWidget {
               // Status selector
               Row(children: [
                 const Text('Status: ',
-                    style:
-                        TextStyle(color: kTextMuted, fontSize: 12)),
+                    style: TextStyle(color: kTextMuted, fontSize: 12)),
                 Expanded(
                   child: DropdownButton<OrderStatus>(
                     value: o.status,
@@ -360,8 +354,7 @@ class _OrdersTab extends StatelessWidget {
                         .map((s) => DropdownMenuItem(
                               value: s,
                               child: Text(s.label,
-                                  style:
-                                      const TextStyle(fontSize: 12)),
+                                  style: const TextStyle(fontSize: 12)),
                             ))
                         .toList(),
                     onChanged: (v) {
@@ -407,20 +400,27 @@ class _ProductDialogState extends State<_ProductDialog> {
   void initState() {
     super.initState();
     final p = widget.product;
-    _nameCtrl          = TextEditingController(text: p?.name ?? '');
-    _priceCtrl         = TextEditingController(text: p?.price.toStringAsFixed(2) ?? '');
-    _originalPriceCtrl = TextEditingController(
-        text: p?.originalPrice?.toStringAsFixed(2) ?? '');
-    _imageCtrl         = TextEditingController(text: p?.image ?? 'https://picsum.photos/seed/new/500/600');
-    _descCtrl          = TextEditingController(text: p?.description ?? '');
-    _stockCtrl         = TextEditingController(text: '${p?.stock ?? 10}');
-    _category          = p?.category ?? productCategories[1];
+    _nameCtrl = TextEditingController(text: p?.name ?? '');
+    _priceCtrl = TextEditingController(text: p?.price.toStringAsFixed(2) ?? '');
+    _originalPriceCtrl =
+        TextEditingController(text: p?.originalPrice?.toStringAsFixed(2) ?? '');
+    _imageCtrl = TextEditingController(
+        text: p?.image ?? 'https://picsum.photos/seed/new/500/600');
+    _descCtrl = TextEditingController(text: p?.description ?? '');
+    _stockCtrl = TextEditingController(text: '${p?.stock ?? 10}');
+    _category = p?.category ?? productCategories[1];
   }
 
   @override
   void dispose() {
-    for (final c in [_nameCtrl, _priceCtrl, _originalPriceCtrl,
-      _imageCtrl, _descCtrl, _stockCtrl]) {
+    for (final c in [
+      _nameCtrl,
+      _priceCtrl,
+      _originalPriceCtrl,
+      _imageCtrl,
+      _descCtrl,
+      _stockCtrl
+    ]) {
       c.dispose();
     }
     super.dispose();
@@ -440,16 +440,16 @@ class _ProductDialogState extends State<_ProductDialog> {
     final stock = int.tryParse(_stockCtrl.text) ?? 0;
 
     if (isEdit) {
-      prov.updateProduct(widget.product!.copyWith(
-        name: _nameCtrl.text.trim(),
-        price: price,
-        image: _imageCtrl.text.trim(),
-        description: _descCtrl.text.trim(),
-        category: _category,
-        stock: stock,
-      ));
+      await prov.updateProduct(widget.product!.id, {
+        'name': _nameCtrl.text.trim(),
+        'price': price,
+        'image': _imageCtrl.text.trim(),
+        'description': _descCtrl.text.trim(),
+        'category': _category,
+        'stock': stock,
+      });
     } else {
-      prov.addProduct(prov.createNew(
+      await prov.createProduct(
         name: _nameCtrl.text.trim(),
         price: price,
         image: _imageCtrl.text.trim(),
@@ -457,7 +457,7 @@ class _ProductDialogState extends State<_ProductDialog> {
         category: _category,
         stock: stock,
         originalPrice: origPrice,
-      ));
+      );
     }
 
     if (mounted) Navigator.pop(context);
@@ -490,7 +490,6 @@ class _ProductDialogState extends State<_ProductDialog> {
                   ),
                 ]),
                 const SizedBox(height: 16),
-
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(
@@ -502,16 +501,13 @@ class _ProductDialogState extends State<_ProductDialog> {
                         Row(children: [
                           Expanded(
                               child: _dialogField('Preço (R\$)', _priceCtrl,
-                                  keyboardType:
-                                      TextInputType.number,
+                                  keyboardType: TextInputType.number,
                                   required: true)),
                           const SizedBox(width: 12),
                           Expanded(
-                              child: _dialogField(
-                                  'Preço original (opcional)',
+                              child: _dialogField('Preço original (opcional)',
                                   _originalPriceCtrl,
-                                  keyboardType:
-                                      TextInputType.number)),
+                                  keyboardType: TextInputType.number)),
                         ]),
                         const SizedBox(height: 14),
                         Row(children: [
@@ -554,27 +550,23 @@ class _ProductDialogState extends State<_ProductDialog> {
                             required: true),
                         const SizedBox(height: 14),
                         const Text('Descrição',
-                            style: TextStyle(
-                                color: kTextMuted, fontSize: 12)),
+                            style: TextStyle(color: kTextMuted, fontSize: 12)),
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _descCtrl,
                           maxLines: 3,
-                          style: const TextStyle(
-                              color: kText, fontSize: 13),
+                          style: const TextStyle(color: kText, fontSize: 13),
                           decoration: const InputDecoration(
                             contentPadding: EdgeInsets.symmetric(
                                 horizontal: 14, vertical: 12),
                           ),
-                          validator: (v) => (v == null || v.isEmpty)
-                              ? 'Obrigatório'
-                              : null,
+                          validator: (v) =>
+                              (v == null || v.isEmpty) ? 'Obrigatório' : null,
                         ),
                       ],
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 20),
                 SizedBox(
                   width: double.infinity,
@@ -590,7 +582,8 @@ class _ProductDialogState extends State<_ProductDialog> {
                             height: 20,
                             child: CircularProgressIndicator(
                                 strokeWidth: 2, color: Colors.white))
-                        : Text(isEdit ? 'Salvar alterações' : 'Adicionar produto'),
+                        : Text(
+                            isEdit ? 'Salvar alterações' : 'Adicionar produto'),
                   ),
                 ),
               ],
@@ -604,20 +597,17 @@ class _ProductDialogState extends State<_ProductDialog> {
   Widget _dialogField(String label, TextEditingController ctrl,
       {TextInputType? keyboardType, bool required = false}) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(label,
-          style: const TextStyle(color: kTextMuted, fontSize: 12)),
+      Text(label, style: const TextStyle(color: kTextMuted, fontSize: 12)),
       const SizedBox(height: 8),
       TextFormField(
         controller: ctrl,
         keyboardType: keyboardType,
         style: const TextStyle(color: kText, fontSize: 13),
         decoration: const InputDecoration(
-          contentPadding:
-              EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         ),
         validator: required
-            ? (v) =>
-                (v == null || v.isEmpty) ? 'Campo obrigatório' : null
+            ? (v) => (v == null || v.isEmpty) ? 'Campo obrigatório' : null
             : null,
       ),
     ]);
@@ -631,7 +621,10 @@ class _StatCard extends StatelessWidget {
   final IconData icon;
   final Color color;
   const _StatCard(
-      {required this.label, required this.value, required this.icon, required this.color});
+      {required this.label,
+      required this.value,
+      required this.icon,
+      required this.color});
 
   @override
   Widget build(BuildContext context) => Container(
@@ -649,8 +642,7 @@ class _StatCard extends StatelessWidget {
                 style: TextStyle(
                     color: color, fontWeight: FontWeight.w800, fontSize: 18)),
             Text(label,
-                style:
-                    const TextStyle(color: kTextMuted, fontSize: 11)),
+                style: const TextStyle(color: kTextMuted, fontSize: 11)),
           ]),
         ]),
       );

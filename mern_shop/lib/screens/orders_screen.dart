@@ -8,8 +8,19 @@ import '../widgets/app_header.dart';
 import '../widgets/order_status_stepper.dart';
 import '../theme.dart';
 
-class OrdersScreen extends StatelessWidget {
+class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
+
+  @override
+  State<OrdersScreen> createState() => _OrdersScreenState();
+}
+
+class _OrdersScreenState extends State<OrdersScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() => context.read<OrderProvider>().fetchMyOrders());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +88,8 @@ class OrdersScreen extends StatelessWidget {
                                 fontSize: 24,
                                 color: kText,
                                 fontWeight: FontWeight.w700)),
-                        Text('${orders.length} pedido${orders.length != 1 ? 's' : ''}',
+                        Text(
+                            '${orders.length} pedido${orders.length != 1 ? 's' : ''}',
                             style: const TextStyle(
                                 color: kTextMuted, fontSize: 13)),
                       ],
@@ -112,19 +124,23 @@ class _OrderCardState extends State<_OrderCard> {
 
   Color get _statusColor {
     switch (widget.order.status) {
-      case OrderStatus.delivered: return kSuccess;
-      case OrderStatus.cancelled: return kError;
-      case OrderStatus.shipped:   return Colors.blue;
-      case OrderStatus.pending:   return Colors.orange;
-      default:                    return kGold;
+      case OrderStatus.delivered:
+        return kSuccess;
+      case OrderStatus.cancelled:
+        return kError;
+      case OrderStatus.shipped:
+        return Colors.blue;
+      case OrderStatus.pending:
+        return Colors.orange;
+      default:
+        return kGold;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final order = widget.order;
-    final dateStr =
-        '${order.createdAt.day.toString().padLeft(2, '0')}/'
+    final dateStr = '${order.createdAt.day.toString().padLeft(2, '0')}/'
         '${order.createdAt.month.toString().padLeft(2, '0')}/'
         '${order.createdAt.year}';
 
@@ -160,13 +176,12 @@ class _OrderCardState extends State<_OrderCard> {
 
                   // Status badge
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: _statusColor.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                          color: _statusColor.withOpacity(0.4)),
+                      border: Border.all(color: _statusColor.withOpacity(0.4)),
                     ),
                     child: Text(
                       order.status.label,
@@ -189,8 +204,8 @@ class _OrderCardState extends State<_OrderCard> {
                               fontSize: 15)),
                       Text(
                           '${order.items.length} ${order.items.length == 1 ? 'item' : 'itens'}',
-                          style: const TextStyle(
-                              color: kTextFaint, fontSize: 11)),
+                          style:
+                              const TextStyle(color: kTextFaint, fontSize: 11)),
                     ],
                   ),
                   const SizedBox(width: 8),
@@ -253,8 +268,7 @@ class _OrderCardState extends State<_OrderCard> {
                               style: const TextStyle(
                                   color: kTextMuted, fontSize: 12)),
                           const SizedBox(width: 8),
-                          Text(
-                              'R\$ ${item.subtotal.toStringAsFixed(2)}',
+                          Text('R\$ ${item.subtotal.toStringAsFixed(2)}',
                               style: const TextStyle(
                                   color: kGold,
                                   fontSize: 13,
@@ -282,9 +296,7 @@ class _OrderCardState extends State<_OrderCard> {
                               '${order.address.street}, ${order.address.number}\n'
                               '${order.address.city}/${order.address.state}',
                               style: const TextStyle(
-                                  color: kTextMuted,
-                                  fontSize: 12,
-                                  height: 1.5),
+                                  color: kTextMuted, fontSize: 12, height: 1.5),
                             ),
                           ],
                         ),
@@ -322,8 +334,7 @@ class _OrderCardState extends State<_OrderCard> {
                       decoration: BoxDecoration(
                         color: kGold.withOpacity(0.08),
                         borderRadius: BorderRadius.circular(8),
-                        border:
-                            Border.all(color: kGold.withOpacity(0.3)),
+                        border: Border.all(color: kGold.withOpacity(0.3)),
                       ),
                       child: Row(children: [
                         const Icon(Icons.local_shipping_outlined,
@@ -334,8 +345,7 @@ class _OrderCardState extends State<_OrderCard> {
                           '${order.estimatedDelivery!.day.toString().padLeft(2, '0')}/'
                           '${order.estimatedDelivery!.month.toString().padLeft(2, '0')}/'
                           '${order.estimatedDelivery!.year}',
-                          style: const TextStyle(
-                              color: kGold, fontSize: 12),
+                          style: const TextStyle(color: kGold, fontSize: 12),
                         ),
                       ]),
                     ),

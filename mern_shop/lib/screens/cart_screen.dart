@@ -154,7 +154,7 @@ class _CartScreenState extends State<CartScreen> {
         zipCode: _zipCtrl.text,
       );
 
-  void _next() {
+  void _next() async {
     if (_step == 1 && !_addressForm.currentState!.validate()) return;
 
     final cart = context.read<CartProvider>();
@@ -166,15 +166,22 @@ class _CartScreenState extends State<CartScreen> {
         Navigator.pushNamed(context, '/login');
         return;
       }
-      final order = context.read<OrderProvider>().placeOrder(
-            userId: auth.user!.id,
-            cartItems: cart.items.toList(),
-            address: _addressData,
-            paymentMethod: _paymentMethod,
-            subtotal: cart.subtotal,
-            shippingCost: cart.shippingCost,
-            tax: cart.tax,
-          );
+      final order = await context.read<OrderProvider>().placeOrder(
+  cartItems: cart.items.toList(),
+  address: _addressData,
+  paymentMethod: _paymentMethod,
+  subtotal: cart.subtotal,
+  shippingCost: cart.shippingCost,
+  tax: cart.tax,
+);
+
+if (order == null) {
+  // Mostrar erro
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(context.read<OrderProvider>().error ?? 'Erro ao criar pedido')),
+  );
+  return;
+}
       cart.clear();
       Navigator.pushReplacementNamed(context, '/order-success',
           arguments: order);

@@ -27,15 +27,21 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _submit() async {
     if (!_form.currentState!.validate()) return;
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     await Future.delayed(const Duration(milliseconds: 600));
     if (!mounted) return;
 
-    final err = context.read<AuthProvider>().login(
+    final err = await context.read<AuthProvider>().login(
           _emailCtrl.text.trim(),
           _passCtrl.text,
         );
-    setState(() { _loading = false; _error = err; });
+    setState(() {
+      _loading = false;
+      _error = err;
+    });
     if (err == null) {
       Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
     }
@@ -108,8 +114,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           GestureDetector(
                             onTap: () => Navigator.pushNamedAndRemoveUntil(
                                 context, '/', (_) => false),
-                            child: const Icon(Icons.arrow_back,
-                                color: kTextMuted),
+                            child:
+                                const Icon(Icons.arrow_back, color: kTextMuted),
                           ),
                           const SizedBox(height: 32),
                           Text('Bem-vindo\nde volta.',
@@ -131,8 +137,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               decoration: BoxDecoration(
                                 color: kError.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                    color: kError.withOpacity(0.4)),
+                                border:
+                                    Border.all(color: kError.withOpacity(0.4)),
                               ),
                               child: Row(children: [
                                 const Icon(Icons.error_outline,

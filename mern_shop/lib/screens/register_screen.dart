@@ -41,7 +41,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     await Future.delayed(const Duration(milliseconds: 700));
     if (!mounted) return;
 
-    final err = context.read<AuthProvider>().register(
+    final err = await context.read<AuthProvider>().register(
           _nameCtrl.text.trim(),
           _emailCtrl.text.trim(),
           _passCtrl.text,

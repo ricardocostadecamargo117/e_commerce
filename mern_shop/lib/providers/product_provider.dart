@@ -1,66 +1,92 @@
 import 'package:flutter/foundation.dart';
-import 'package:uuid/uuid.dart';
 import '../models/product.dart';
+import '../services/api_service.dart';
 
 class ProductProvider extends ChangeNotifier {
-  final List<Product> _products = List.from(mockProducts);
-  final _uuid = const Uuid();
+  List<Product> _products = [];
+  bool _loading = false;
+  String? _error;
 
   List<Product> get products => List.unmodifiable(_products);
+  bool get loading           => _loading;
+  String? get error          => _error;
 
-  List<Product> search(String query) {
-    if (query.isEmpty) return products;
-    final q = query.toLowerCase();
-    return _products
-        .where((p) =>
-            p.name.toLowerCase().contains(q) ||
-            p.category.toLowerCase().contains(q))
-        .toList();
-  }
-
-  List<Product> byCategory(String category) {
-    if (category == 'Todos') return products;
-    return _products.where((p) => p.category == category).toList();
-  }
-
-  void addProduct(Product product) {
-    _products.insert(0, product);
+  // ── Buscar todos os produtos ───────────────────────────────────────────────
+  Future<void> fetchProducts({String? category, String? search}) async {
+    _loading = true;
+    _error = null;
     notifyListeners();
-  }
 
-  void updateProduct(Product updated) {
-    final idx = _products.indexWhere((p) => p.id == updated.id);
-    if (idx >= 0) {
-      _products[idx] = updated;
-      notifyListeners();
+    try {
+      String path = '/products?';
+      if (category != null && category != 'Todos') {
+        path += 'category=${Uri.encodeComponent(category)}&';
+      }
+      if (search != null && search.isNotEmpty) {
+        path += 'search=${Uri.encodeComponent(search)}';
+      }
+
+      final data = await ApiService.get(path) as List;
+      _products = data.map((json) => Product.fromJson(json)).toList();
+    } catch (e) {
+      _error = e.toString().replaceFirst('Exception: ', '');
     }
-  }
 
-  void deleteProduct(String id) {
-    _products.removeWhere((p) => p.id == id);
+    _loading = false;
     notifyListeners();
   }
 
-  Product createNew({
+  // ── Criar produto (admin) ──────────────────────────────────────────────────
+  Future<String?> createProduct({
     required String name,
     required double price,
+    double? originalPrice,
     required String image,
     required String description,
     required String category,
     required int stock,
-    double? originalPrice,
-  }) =>
-      Product(
-        id: _uuid.v4(),
-        name: name,
-        price: price,
-        image: image,
-        description: description,
-        category: category,
-        rating: 0.0,
-        numReviews: 0,
-        stock: stock,
-        isNew: true,
-        originalPrice: originalPrice,
-      );
+  }) async {
+    try {
+      final data = await ApiService.post('/products', {
+        'name':          name,
+        'price':         price,
+        'originalPrice': originalPrice,
+        'image':         image,
+        'description':   description,
+        'category':      category,
+        'stock':         stock,
+        'isNew':         true,
+      });
+      _products.insert(0, Product.fromJson(data));
+      notifyListeners();
+      return null;
+    } catch (e) {
+      return e.toString().replaceFirst('Exception: ', '');
+    }
+  }
+
+  // ── Editar produto (admin) ─────────────────────────────────────────────────
+  Future<String?> updateProduct(String id, Map<String, dynamic> fields) async {
+    try {
+      final data = await ApiService.put('/products/$id', fields);
+      final idx = _products.indexWhere((p) => p.id == id);
+      if (idx >= 0) _products[idx] = Product.fromJson(data);
+      notifyListeners();
+      return null;
+    } catch (e) {
+      return e.toString().replaceFirst('Exception: ', '');
+    }
+  }
+
+  // ── Excluir produto (admin) ────────────────────────────────────────────────
+  Future<String?> deleteProduct(String id) async {
+    try {
+      await ApiService.delete('/products/$id');
+      _products.removeWhere((p) => p.id == id);
+      notifyListeners();
+      return null;
+    } catch (e) {
+      return e.toString().replaceFirst('Exception: ', '');
+    }
+  }
 }
